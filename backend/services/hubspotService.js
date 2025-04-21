@@ -1,6 +1,9 @@
-import { get } from "axios";
+import axios from "axios";
+import fetch from "node-fetch";
+import dotenv from "dotenv";
+dotenv.config();
 
-const fetch = require("node-fetch");
+import db from "../db.js";
 
 const HUBSPOT_API_KEY = process.env.HUBSPOT_API_KEY;
 
@@ -35,12 +38,10 @@ async function fetchContacts() {
   return contacts.filter((c) => c.roles.length > 0);
 }
 
-const { getCoordsFromCache, storeCoordsInCache } = require("../db");
-
 async function geocodeAddress(address) {
   if (!address) return { lat: null, lng: null };
 
-  const cached = await getCoordsFromCache(address);
+  const cached = await db.getCoordsFromCache(address);
   if (cached) return cached;
 
   const encodedAddress = encodeURIComponent(address);
@@ -57,7 +58,7 @@ async function geocodeAddress(address) {
     const lat = parseFloat(data[0].lat);
     const lng = parseFloat(data[0].lon);
 
-    await storeCoordsInCache(address, lat, lng);
+    await db.storeCoordsInCache(address, lat, lng);
     return { lat, lng };
   } catch (err) {
     console.error(`Geocoding error for address "${address}":`, err);

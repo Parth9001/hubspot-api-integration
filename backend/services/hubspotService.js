@@ -35,28 +35,32 @@ async function fetchContacts() {
   return contacts.filter((c) => c.roles.length > 0);
 }
 
+const { getCoordsFromCache, storeCoordsInCache } = require("../db");
+
 async function geocodeAddress(address) {
   if (!address) return { lat: null, lng: null };
+
+  const cached = await getCoordsFromCache(address);
+  if (cached) return cached;
 
   const encodedAddress = encodeURIComponent(address);
   const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1`;
 
   try {
     const response = await fetch(url, {
-      headers: {
-        "User-Agent": "ProStructInternAssignment/1.0",
-      },
+      headers: { "User-Agent": "ProStructInternAssignment/1.0" },
     });
     const data = await response.json();
 
     if (data.length === 0) return { lat: null, lng: null };
 
-    return {
-      lat: parseFloat(data[0].lat),
-      lng: parseFloat(data[0].lon),
-    };
+    const lat = parseFloat(data[0].lat);
+    const lng = parseFloat(data[0].lon);
+
+    await storeCoordsInCache(address, lat, lng);
+    return { lat, lng };
   } catch (err) {
-    console.error(`Failed to geocode address "${address}":`, err);
+    console.error(`Geocoding error for address "${address}":`, err);
     return { lat: null, lng: null };
   }
 }

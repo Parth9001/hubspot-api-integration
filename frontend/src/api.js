@@ -1,4 +1,7 @@
 export async function fetchContacts() {
-  const res = await fetch("http://localhost:5000/api/contacts"); // adjust port if needed
+  const res = await fetch("http://localhost:6000/api/contacts", {
+    method: "GET",
+  }); // adjust port if needed
+  console.log(res);
   return res.json();
 }

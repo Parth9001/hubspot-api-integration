@@ -8,34 +8,44 @@ import db from "../db.js";
 const HUBSPOT_API_KEY = process.env.HUBSPOT_API_KEY;
 
 async function fetchContacts() {
-  const url = `https://api.hubapi.com/crm/v3/objects/contacts?properties=firstname,lastname,email,phone,address,project_role&archived=false`;
+  try {
+    const url = `https://api.hubapi.com/crm/v3/objects/contacts`;
 
-  const response = await axios.get(url, {
-    headers: { Authorization: `Bearer ${HUBSPOT_API_KEY}` },
-  });
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${HUBSPOT_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      params: {
+        properties: "firstname, lastname, email, phone, address, project_role", // Multiple properties can be passed as comma-separated values
+      },
+    });
 
-  const contacts = await Promise.all(
-    response.data.results.map(async (contact) => {
-      const props = contact.properties;
-      const fullName = `${props.firstname} ${props.lastname}`;
-      const roles = props.project_role?.split(";") || [];
+    const contacts = await Promise.all(
+      response.data.results.map(async (contact) => {
+        const props = contact.properties;
+        const fullName = `${props.firstname} ${props.lastname}`;
+        const roles = props.project_role?.split(";") || [];
 
-      const { lat, lng } = await geocodeAddress(props.address);
+        const { lat, lng } = await geocodeAddress(props.address);
 
-      return {
-        id: contact.id,
-        name: fullName,
-        email: props.email,
-        phone: props.phone,
-        address: props.address,
-        roles,
-        lat,
-        lng,
-      };
-    })
-  );
+        return {
+          name: fullName,
+          email: props.email,
+          phone: props.phone,
+          address: props.address,
+          roles,
+          lat,
+          lng,
+        };
+      })
+    );
 
-  return contacts.filter((c) => c.roles.length > 0);
+    return contacts.filter((c) => c.roles.length > 0);
+  } catch (err) {
+    console.error("❌ Error in fetchContacts:", err);
+    throw err; // so router can return 500
+  }
 }
 
 async function geocodeAddress(address) {

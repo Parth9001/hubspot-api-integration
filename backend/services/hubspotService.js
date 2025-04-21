@@ -41,7 +41,7 @@ async function fetchContacts() {
       })
     );
 
-    return contacts.filter((c) => c.roles.length > 0);
+    return contacts.filter((c) => c.roles.length > 0); // Filter out contacts with no roles
   } catch (err) {
     console.error("❌ Error in fetchContacts:", err);
     throw err; // so router can return 500

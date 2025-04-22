@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/hubspot-api-integration/static/css/main.ff2d33cc.css",
+    "main.js": "/hubspot-api-integration/static/js/main.40cc2dae.js",
+    "static/js/453.8ab44547.chunk.js": "/hubspot-api-integration/static/js/453.8ab44547.chunk.js",
+    "index.html": "/hubspot-api-integration/index.html",
+    "main.ff2d33cc.css.map": "/hubspot-api-integration/static/css/main.ff2d33cc.css.map",
+    "main.40cc2dae.js.map": "/hubspot-api-integration/static/js/main.40cc2dae.js.map",
+    "453.8ab44547.chunk.js.map": "/hubspot-api-integration/static/js/453.8ab44547.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ff2d33cc.css",
+    "static/js/main.40cc2dae.js"
+  ]
+}

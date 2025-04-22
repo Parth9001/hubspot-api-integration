@@ -6,15 +6,15 @@ import contactsRouter from "./routes/contacts.js";
 import cors from "cors";
 
 const app = express();
-const PORT = 8080;
+const PORT = 3000;
 
 app.use(express.json());
 
 app.use(
   cors({
-    origin: "*", // Change this to your frontend's origin
+    origin: "*",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // Allow required methods
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );

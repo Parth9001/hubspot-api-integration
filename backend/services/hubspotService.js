@@ -27,7 +27,9 @@ async function fetchContacts() {
         const fullName = `${props.firstname} ${props.lastname}`;
         const roles = props.project_role?.split(";") || [];
 
-        const { lat, lng } = await geocodeAddress(props.address);
+        const { lat, lng, city, state, country } = await geocodeAddress(
+          props.address
+        );
 
         return {
           name: fullName,
@@ -37,6 +39,9 @@ async function fetchContacts() {
           roles,
           lat,
           lng,
+          city,
+          state,
+          country,
         };
       })
     );
@@ -49,13 +54,14 @@ async function fetchContacts() {
 }
 
 async function geocodeAddress(address) {
-  if (!address) return { lat: null, lng: null };
+  if (!address)
+    return { lat: null, lng: null, city: null, state: null, country: null };
 
   const cached = await db.getCoordsFromCache(address);
   if (cached) return cached;
 
   const encodedAddress = encodeURIComponent(address);
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1`;
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodedAddress}&format=json&limit=1&addressdetails=1`;
 
   try {
     const response = await fetch(url, {
@@ -63,16 +69,28 @@ async function geocodeAddress(address) {
     });
     const data = await response.json();
 
-    if (data.length === 0) return { lat: null, lng: null };
+    if (data.length === 0)
+      return { lat: null, lng: null, city: null, state: null, country: null };
 
-    const lat = parseFloat(data[0].lat);
-    const lng = parseFloat(data[0].lon);
+    const result = data[0];
+    const { city, town, village, state, country } = result.address;
 
-    await db.storeCoordsInCache(address, lat, lng);
-    return { lat, lng };
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
+
+    const locationInfo = {
+      lat,
+      lng,
+      city: city || town || village || null,
+      state: state || null,
+      country: country || null,
+    };
+
+    await db.storeCoordsInCache(address, lat, lng, city, state, country);
+    return locationInfo;
   } catch (err) {
     console.error(`Geocoding error for address "${address}":`, err);
-    return { lat: null, lng: null };
+    return { lat: null, lng: null, city: null, state: null, country: null };
   }
 }
 

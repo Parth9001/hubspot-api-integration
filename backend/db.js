@@ -7,7 +7,10 @@ db.serialize(() => {
     CREATE TABLE IF NOT EXISTS geocache (
       address TEXT PRIMARY KEY,
       lat REAL,
-      lng REAL
+      lng REAL,
+      city TEXT,
+      state TEXT,
+      country TEXT
     )
   `);
 });
@@ -15,7 +18,7 @@ db.serialize(() => {
 function getCoordsFromCache(address) {
   return new Promise((resolve, reject) => {
     db.get(
-      "SELECT lat, lng FROM geocache WHERE address = ?",
+      "SELECT lat, lng, city, state, country FROM geocache WHERE address = ?",
       [address],
       (err, row) => {
         if (err) reject(err);
@@ -25,11 +28,12 @@ function getCoordsFromCache(address) {
   });
 }
 
-function storeCoordsInCache(address, lat, lng) {
+function storeCoordsInCache(address, lat, lng, city, state, country) {
   return new Promise((resolve, reject) => {
     db.run(
-      "INSERT OR REPLACE INTO geocache (address, lat, lng) VALUES (?, ?, ?)",
-      [address, lat, lng],
+      `INSERT OR REPLACE INTO geocache (address, lat, lng, city, state, country)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [address, lat, lng, city, state, country],
       (err) => {
         if (err) reject(err);
         else resolve();
